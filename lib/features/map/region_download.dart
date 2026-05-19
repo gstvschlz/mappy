@@ -232,6 +232,13 @@ class _RegionDownloadScreenState extends State<RegionDownloadScreen> {
         urlTemplate: _source.urlTemplate,
         subdomains: _source.subdomains,
         userAgentPackageName: 'com.scholze.mappy',
+        tileProvider: FMTCTileProvider(
+          stores: {_source.id: BrowseStoreStrategy.readUpdateCreate},
+          headers: const {
+            'User-Agent':
+                'Mappy/0.1 (geological field mapping; com.scholze.mappy)'
+          },
+        ),
       ),
     );
 

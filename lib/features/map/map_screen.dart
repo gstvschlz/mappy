@@ -192,6 +192,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 userAgentPackageName: 'com.scholze.mappy',
                 tileProvider: FMTCTileProvider(
                   stores: {src.id: BrowseStoreStrategy.readUpdateCreate},
+                  headers: const {
+                    'User-Agent':
+                        'Mappy/0.1 (geological field mapping; com.scholze.mappy)'
+                  },
                 ),
                 maxNativeZoom: src.maxZoom,
               ),
