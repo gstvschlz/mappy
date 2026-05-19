@@ -164,10 +164,12 @@ class _ObservationDetailScreenState
                   urlTemplate: TileSource.topo.urlTemplate,
                   subdomains: TileSource.topo.subdomains,
                   userAgentPackageName: 'com.scholze.mappy',
+                  // NOT const — TileLayer mutates this map to inject its
+                  // userAgentPackageName-derived header.
                   tileProvider: NetworkTileProvider(
-                    headers: const {
+                    headers: {
                       'User-Agent':
-                          'mappy/0.1 (geological field mapping; com.scholze.mappy)'
+                          'mappy/0.1 (geological field mapping; com.scholze.mappy)',
                     },
                   ),
                 ),

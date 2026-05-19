@@ -191,14 +191,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 urlTemplate: src.urlTemplate,
                 subdomains: src.subdomains,
                 userAgentPackageName: 'com.scholze.mappy',
-                // Use the plain network tile provider for the live map.
-                // FMTC's storage backend has been the suspected cause of the
-                // grey-tile issue; restricting FMTC usage to the explicit
-                // pre-download flow guarantees online browsing always works.
+                // IMPORTANT: do NOT pass a const map here. TileLayer mutates
+                // the provider's headers to inject its userAgentPackageName,
+                // which throws on an immutable map and breaks every tile
+                // (cause of the grey-map regression). A regular map literal
+                // is required per flutter_map's TileProvider docs.
                 tileProvider: NetworkTileProvider(
-                  headers: const {
+                  headers: {
                     'User-Agent':
-                        'mappy/0.1 (geological field mapping; com.scholze.mappy)'
+                        'mappy/0.1 (geological field mapping; com.scholze.mappy)',
                   },
                 ),
                 maxNativeZoom: src.maxZoom,

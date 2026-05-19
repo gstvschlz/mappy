@@ -86,7 +86,8 @@ class _RegionDownloadScreenState extends State<RegionDownloadScreen> {
                   subdomains: _source.subdomains,
                   userAgentPackageName: 'com.scholze.mappy',
                   tileProvider: NetworkTileProvider(
-                    headers: const {'User-Agent': _kUserAgent},
+                    // Not const: TileLayer mutates this map.
+                    headers: {'User-Agent': _kUserAgent},
                   ),
                 ),
                 PolygonLayer(
@@ -317,7 +318,8 @@ class _RegionDownloadScreenState extends State<RegionDownloadScreen> {
         userAgentPackageName: 'com.scholze.mappy',
         tileProvider: FMTCTileProvider(
           stores: {_source.id: BrowseStoreStrategy.readUpdateCreate},
-          headers: const {'User-Agent': _kUserAgent},
+          // Not const: TileLayer mutates this map.
+          headers: {'User-Agent': _kUserAgent},
         ),
       ),
     );
