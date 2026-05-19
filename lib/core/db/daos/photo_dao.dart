@@ -5,7 +5,7 @@ import '../tables.dart';
 
 part 'photo_dao.g.dart';
 
-@DriftAccessor(tables: [Photos])
+@DriftAccessor(tables: [Photos, Observations])
 class PhotoDao extends DatabaseAccessor<AppDatabase> with _$PhotoDaoMixin {
   PhotoDao(super.db);
 
@@ -21,6 +21,18 @@ class PhotoDao extends DatabaseAccessor<AppDatabase> with _$PhotoDaoMixin {
           ..where((t) => t.observationId.equals(observationId))
           ..orderBy([(t) => OrderingTerm.asc(t.sortIndex)]))
         .watch();
+  }
+
+  /// Stream every non-deleted photo belonging to observations in [projectId],
+  /// most recently taken first.
+  Stream<List<Photo>> watchForProject(String projectId) {
+    final query = select(photos).join([
+      innerJoin(observations, observations.id.equalsExp(photos.observationId)),
+    ])
+      ..where(observations.projectId.equals(projectId) &
+          observations.deletedAt.isNull())
+      ..orderBy([OrderingTerm.desc(photos.takenAt)]);
+    return query.watch().map((rows) => rows.map((r) => r.readTable(photos)).toList());
   }
 
   Future<void> insert(Photo photo) => into(photos).insert(photo.toCompanion(false));

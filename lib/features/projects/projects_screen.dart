@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/db/database.dart';
 import '../../core/db_provider.dart';
 import 'active_project.dart';
+import 'project_detail.dart';
 
 class ProjectsScreen extends ConsumerWidget {
   const ProjectsScreen({super.key});
@@ -66,9 +67,11 @@ class ProjectsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                onTap: () => ref
-                    .read(activeProjectProvider.notifier)
-                    .setActive(p.id),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ProjectDetailScreen(project: p),
+                  ),
+                ),
               );
             },
           );
