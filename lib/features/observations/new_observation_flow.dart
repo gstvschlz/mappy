@@ -13,6 +13,7 @@ import '../../core/files/paths.dart';
 import '../../core/location/location_service.dart';
 import '../projects/active_project.dart';
 import 'observation_camera.dart';
+import 'tag_widgets.dart';
 
 class NewObservationFlow extends ConsumerStatefulWidget {
   const NewObservationFlow({super.key, this.manualPoint});
@@ -27,6 +28,7 @@ class NewObservationFlow extends ConsumerStatefulWidget {
 class _NewObservationFlowState extends ConsumerState<NewObservationFlow> {
   final TextEditingController _descController = TextEditingController();
   List<CapturedShot> _shots = [];
+  List<String> _tags = [];
   Position? _fix;
   bool _loadingFix = true;
   bool _saving = false;
@@ -124,6 +126,14 @@ class _NewObservationFlowState extends ConsumerState<NewObservationFlow> {
       ));
     }
 
+    if (_tags.isNotEmpty) {
+      await db.tagDao.setTagsForObservation(
+        observationId: obsId,
+        projectId: active.id,
+        names: _tags,
+      );
+    }
+
     if (!mounted) return;
     setState(() => _saving = false);
     Navigator.of(context).pop();
@@ -218,8 +228,28 @@ class _NewObservationFlowState extends ConsumerState<NewObservationFlow> {
               labelText: 'Description',
               hintText:
                   'e.g. Pale-blue chalcedony nodule in basalt, 5 cm wide.',
-              border: OutlineInputBorder(),
             ),
+          ),
+          const SizedBox(height: 16),
+          Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Consumer(
+            builder: (ctx, ref, _) {
+              final active = ref.watch(activeProjectProvider).value;
+              if (active == null) {
+                return Text(
+                  'Select a project to add tags.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                );
+              }
+              return TagsEditor(
+                projectId: active.id,
+                tags: _tags,
+                onChanged: (next) => setState(() => _tags = next),
+              );
+            },
           ),
         ],
       ),
