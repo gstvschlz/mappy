@@ -26,7 +26,7 @@ final tileSourceProvider =
 });
 
 class TileSourceController extends StateNotifier<TileSource> {
-  TileSourceController() : super(TileSource.osm) {
+  TileSourceController() : super(TileSource.topo) {
     _load();
   }
 
@@ -192,12 +192,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 userAgentPackageName: 'com.scholze.mappy',
                 tileProvider: FMTCTileProvider(
                   stores: {src.id: BrowseStoreStrategy.readUpdateCreate},
-                  headers: const {
+                  loadingStrategy: BrowseLoadingStrategy.onlineFirst,
+                  headers: {
                     'User-Agent':
                         'Mappy/0.1 (geological field mapping; com.scholze.mappy)'
                   },
+                  errorHandler: (exception) {
+                    debugPrint('FMTC tile error: ${exception.type} '
+                        '${exception.message}');
+                    return null;
+                  },
                 ),
                 maxNativeZoom: src.maxZoom,
+                errorTileCallback: (tile, error, stack) {
+                  debugPrint(
+                      'TileLayer error for ${tile.coordinates}: $error');
+                },
               ),
               if (active != null) TrackLayer(projectId: active.id),
               MarkerLayer(

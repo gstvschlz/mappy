@@ -44,5 +44,5 @@ enum TileSource {
   final List<String> subdomains;
 
   static TileSource fromId(String id) =>
-      TileSource.values.firstWhere((t) => t.id == id, orElse: () => TileSource.osm);
+      TileSource.values.firstWhere((t) => t.id == id, orElse: () => TileSource.topo);
 }
