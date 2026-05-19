@@ -1,4 +1,4 @@
-# Mappy
+# `mappy`
 
 A local-only Android field-mapping app for geological observations. Built with Flutter (Dart). Designed for offline use at remote field sites — photos, descriptions, GPS pins, background track recording, and ZIP/CSV/GeoJSON exports.
 
@@ -132,19 +132,6 @@ Covers:
 - GeoJSON serializer round-trip.
 - CSV serializer escapes commas and newlines.
 - Measure-tool distance + area math.
-
----
-
-## Verification checklist (before the field trip)
-
-- [ ] `flutter test` is green.
-- [ ] Cold-start app, grant permissions, GPS marker appears within 10 s.
-- [ ] Pre-download a small region. Put phone in airplane mode. Confirm all three tile sources render at zooms 12–18.
-- [ ] Create an observation with 3 photos → kill the app → reopen → photos + pin still there.
-- [ ] Open one saved JPEG on a desktop. EXIF should carry GPS, altitude, and bearing.
-- [ ] Long-press map far from current GPS → "Create observation here" produces a pin at the tapped spot.
-- [ ] Start track recording → lock phone → walk 200 m → unlock → polyline shows the walk.
-- [ ] Hit **Backup now** → unzip in `Downloads/Mappy/` on a desktop → `observations.geojson` loads in QGIS, photo filenames in properties resolve against `photos/` in the zip.
 
 ---
 
