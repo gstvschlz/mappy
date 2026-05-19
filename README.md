@@ -1,168 +1,165 @@
-# `mappy`
+# mappy
 
-A local-only Android field-mapping app for geological observations. Built with Flutter (Dart). Designed for offline use at remote field sites — photos, descriptions, GPS pins, background track recording, and ZIP/CSV/GeoJSON exports.
+O mappy surgiu de uma necessidade **minha** — de campo mesmo, no sentido literal.
+Eu precisava mapear uma região, marcar pontos, tirar fotos amarradas ao GPS,
+gravar tracks, anotar o que estava vendo, e voltar pra casa com tudo isso
+organizado num projeto. Procurei aplicativo, baixei uns dez, nenhum fazia
+exatamente o que eu queria sem me obrigar a criar conta, sincronizar com
+nuvem ou pagar assinatura. Aí decidi que era mais rápido fazer eu mesmo.
 
-No accounts, no cloud, no sync. All data stays on the device unless you export it.
+É um app offline, local-only, sem cadastro, sem sync, sem nada disso. Tudo
+fica no celular até você exportar. Foi pensado pra geologia de campo, mas
+serve pra qualquer atividade que precise de "ponto + foto + descrição + GPS"
+em lugares onde não tem sinal.
 
----
-
-## What's in this repo
-
-Everything for the app **except** the Flutter-generated Android scaffold (Gradle files, MainActivity.kt, launcher icons, gradle wrapper). The bootstrap script generates those once you have Flutter installed.
-
-```
-lib/                  # Dart source (app code)
-test/                 # Unit tests for DB DAOs, exports, measure tool
-tools/bootstrap.ps1   # One-time scaffold generator + patcher
-pubspec.yaml          # Dependencies (locked in plan)
-build.yaml            # Drift codegen options
-analysis_options.yaml # Lints
-```
+> Status honesto: está em desenvolvimento ativo, sou o único usuário, então
+> coisas quebram. A APK assinada com debug-key, distribuição é instalação
+> direta. Se você caiu aqui e quer experimentar, beleza — só não espere
+> Play Store.
 
 ---
 
-## First-time setup
+## O que ele faz hoje
 
-You need:
-1. **Flutter SDK** — install per https://docs.flutter.dev/get-started/install/windows. Use a stable channel (3.22+).
-2. **Android Studio** (or just the Android command-line tools + SDK platform 26+ and a recent NDK).
-3. A phone with **USB debugging enabled** for development builds.
+- **Mapa offline-friendly** com três fontes de tile: OpenStreetMap,
+  OpenTopoMap (topográfico, com curvas de nível — o default) e Esri World
+  Imagery (satélite). Troca pelo ícone de camadas no topo.
+- **Pré-download de região** — desenha um retângulo no mapa, escolhe o range
+  de zoom, e o app baixa todos os tiles pra usar depois sem internet. Cache
+  via FMTC.
+- **Nova observação** — abre a câmera in-app, tira N fotos da mesma parada,
+  escreve uma descrição, e o GPS é capturado automaticamente no save. EXIF
+  com lat/lon, bearing da bússola e altitude vai dentro de cada JPEG.
+- **Long-press no mapa** pra criar um ponto manualmente onde você quiser
+  (útil pra coisas que você viu mas não chegou perto o suficiente).
+- **Projetos** — separe trabalhos diferentes. Cada projeto tem ícone
+  próprio (vulcão, montanha, martelo, cristal, etc), e a aba mostra um
+  feed visual com todas as fotos do projeto.
+- **Tags por observação** com autocomplete — você digita uma tag e ele
+  sugere as que já usou nesse projeto. Pode adicionar na hora de tirar a
+  foto ou editar depois.
+- **Gravação de trajeto** rodando em foreground service. Cada projeto tem
+  seu próprio estado de gravação independente — dá pra estar gravando dois
+  projetos ao mesmo tempo. Sobrevive a fechar e reabrir o app.
+- **Banner persistente na tela de bloqueio** enquanto está rastreando, pra
+  você não esquecer que o GPS tá ligado e queimar bateria à toa.
+- **Régua** — toca em pontos pra medir distância. A partir de 3 pontos vira
+  área.
+- **Lista de observações** com busca por descrição.
+- **Lixeira** — soft-delete, dá pra restaurar.
+- **Export tudo** num ZIP em `Downloads/mappy/`:
+  - `observations.geojson` (FeatureCollection com pontos e tracks)
+  - `observations.csv`
+  - `tracks.csv` (uma linha por ponto GPS gravado)
+  - `photos/<id>/*.jpg` com EXIF preservado
 
-Then, from the repo root in PowerShell:
+---
+
+## Como rodar (se você quiser brincar)
+
+Vai precisar do Flutter (canal stable, 3.27+) e do Android SDK (API 26+).
+Depois, do raiz do repo:
 
 ```powershell
-pwsh -ExecutionPolicy Bypass -File tools\bootstrap.ps1
-```
-
-The bootstrap script:
-- Runs `flutter create .` to produce the Android scaffold (skips existing files).
-- Patches `AndroidManifest.xml` with the permissions mappy needs (camera, fine/background location, foreground-service, notifications, photo storage).
-- Sets `minSdkVersion` to 26.
-- Runs `flutter pub get`.
-- Runs `build_runner` to generate Drift database glue (`*.g.dart`).
-
----
-
-## Running
-
-Plug your phone in (USB debugging on) and:
-
-```powershell
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
-For a release APK to sideload:
+Pra gerar a APK de release:
 
 ```powershell
 flutter build apk --release
-# APK location: build/app/outputs/flutter-apk/app-release.apk
+# Sai em: build/app/outputs/flutter-apk/app-release.apk
 ```
 
-Copy the APK to the phone, allow "Install from unknown sources" for whichever file manager you use, and tap to install.
+Copia pro celular, libera "Instalar de fontes desconhecidas" pro seu
+gerenciador de arquivos, abre o `.apk` e instala.
 
-(For successive rebuilds to upgrade in place rather than reinstall, sign with a stable keystore — see "Release signing" below.)
+### CI
+
+Tem um workflow do GitHub Actions (`.github/workflows/release.yml`) que roda
+a cada push na `main`, builda a APK e publica como release com tag
+`vX.Y.Z-build.N`. Se o repo for público, a APK é baixável direto da página
+de releases sem login.
 
 ---
 
-## Features (v1)
+## Stack
 
-- **Map** with three tile sources — OpenStreetMap, OpenTopoMap (topographic, contours), Esri World Imagery (satellite). Toggle from the app bar.
-- **Offline tile pre-download** — draw a region (or use the current viewport), pick zoom range, FMTC caches every tile for offline use.
-- **Live GPS** marker, follow-me toggle, lat/lon readout.
-- **New observation** — in-app multi-shot camera with scale-bar hint and compass-bearing overlay, free-text description, GPS auto-captured at save. EXIF GPS + bearing + altitude written into every JPEG.
-- **Manual pin placement** — long-press anywhere on the map.
-- **Projects** — one project per trip, switch from the Projects tab. All exports and lists scope to the active project.
-- **Track recording** — background-capable foreground service with persistent notification. Tap the timeline icon to start/stop.
-- **Measure tool** — tap vertices for distance (auto-switches to area readout once you have ≥3 points).
-- **Observation list** with full-text search by description.
-- **Soft delete** — observations go to a Trash screen and can be restored or deleted permanently.
-- **Export & backup** — one-tap ZIP backup to `Downloads/mappy/` containing:
-  - `observations.geojson` — FeatureCollection, points + linestrings, properties carry descriptions/photo filenames.
-  - `observations.csv` — one row per observation.
-  - `tracks.csv` — one row per recorded GPS point.
-  - `photos/<observationId>/*.jpg` — every photo, EXIF-tagged.
+Tudo Flutter/Dart. Nada de backend.
 
----
-
-## Permissions
-
-On first run, mappy walks you through:
-- **Camera** (required)
-- **Location while using app** (required)
-- **Background location** (for track recording with screen off)
-- **Notifications** (for the persistent track-recording notification)
-- **Storage** (for writing exports to public Downloads on older Android versions)
-
-Background location requires a second prompt on Android 11+ — the OS takes you into system settings. If you don't grant it, foreground-only tracking still works; just don't lock the screen.
+- **Riverpod** pra state.
+- **go_router** pra navegação (legado — boa parte do app ainda usa Navigator
+  direto).
+- **Drift** (SQLite) pro banco local, com codegen via `build_runner`.
+- **flutter_map** + **FMTC** (Flutter Map Tile Caching, com backend ObjectBox)
+  pro mapa e cache offline. **Importante:** o mapa "ao vivo" usa
+  `NetworkTileProvider` direto, sem FMTC, porque o backend dele tem dado
+  problema em release build (provavelmente R8 minificando demais). O FMTC
+  só entra quando você usa o pre-download explícito.
+- **geolocator** pro GPS (foreground e streaming).
+- **camera** + **flutter_image_compress** + **native_exif** pra fotos.
+- **flutter_local_notifications** pro banner de tracking na lock screen.
+- Ícone do app gerado por um script Dart (`tools/gen_icon.dart`) que desenha
+  um pin de mapa estilizado com bandas estratigráficas e um martelo de
+  geólogo. Placeholder até eu fazer um decente.
 
 ---
 
-## Release signing (optional)
-
-To get same-key upgrades instead of full reinstalls:
-
-```powershell
-keytool -genkey -v -keystore $env:USERPROFILE\.android\keystores\mappy.jks `
-    -keyalg RSA -keysize 2048 -validity 10000 -alias mappy
-```
-
-Create `android/key.properties` (already gitignored):
-
-```
-storePassword=<your-store-pw>
-keyPassword=<your-key-pw>
-keyAlias=mappy
-storeFile=C:/Users/<you>/.android/keystores/mappy.jks
-```
-
-And in `android/app/build.gradle`, after the bootstrap-generated default config, add a signingConfig pointing at that key.properties.
-
-For a personal sideload, this is optional — Flutter's debug-signed release APK works fine.
-
----
-
-## Testing
-
-```powershell
-flutter test
-```
-
-Covers:
-- Drift DAO behavior (insert / soft-delete / restore / search / cascade on project delete).
-- GeoJSON serializer round-trip.
-- CSV serializer escapes commas and newlines.
-- Measure-tool distance + area math.
-
----
-
-## Repo layout
+## Layout do código
 
 ```
 lib/
 ├─ main.dart
-├─ app/
-│  ├─ theme.dart                          # Material 3, warm-brown seed
-│  └─ home_shell.dart                     # Bottom-nav: Map / List / Projects / Export
+├─ app/                        # Tema, shell de navegação
 ├─ core/
-│  ├─ db/                                 # Drift schema + DAOs (codegen via build_runner)
-│  ├─ db_provider.dart                    # Riverpod provider for AppDatabase
-│  ├─ location/                           # geolocator + compass wrappers
-│  ├─ permissions/                        # PermissionsGate + first-run screen
-│  ├─ files/paths.dart                    # App-docs / Downloads dirs
-│  └─ exif/exif_writer.dart               # GPS + bearing + altitude into JPEG EXIF
+│  ├─ db/                      # Tabelas Drift + DAOs (com codegen)
+│  ├─ location/                # Wrappers de geolocator e bússola
+│  ├─ permissions/             # Tela de primeira execução
+│  ├─ notifications/           # Banner persistente de tracking
+│  ├─ files/                   # Pastas de app-docs e Downloads
+│  └─ exif/                    # Escrita de EXIF GPS+bearing+altitude
 └─ features/
-   ├─ map/                                # flutter_map + FMTC + region download + measure tool
-   ├─ observations/                       # New obs flow, camera, list, detail, trash
-   ├─ projects/                           # CRUD + active-project Riverpod state
-   ├─ tracks/                             # flutter_background_geolocation recorder + polyline layer
-   └─ export/                             # GeoJSON / CSV / ZIP backup + Export screen
+   ├─ map/                     # flutter_map, fontes de tile, régua, pre-download
+   ├─ observations/            # Fluxo de captura, câmera, lista, detalhe, lixeira
+   ├─ projects/                # CRUD + ícones por projeto + projeto ativo
+   ├─ tracks/                  # Recorder multi-projeto + camada de polilinha
+   └─ export/                  # GeoJSON / CSV / ZIP
 ```
 
 ---
 
-## Attribution
+## Coisas que ainda doem
 
-Map tiles:
+- A APK é assinada com a debug-key. Funciona pra instalar e usar, mas não
+  serve pra Play Store e cada rebuild pode forçar reinstalação (depende
+  do hash da debug-key na máquina).
+- `applicationId` ainda é `com.example.mappy` — preciso mudar antes de
+  publicar.
+- Vários plugins ainda usam o KGP velho (`camera_android_camerax`,
+  `share_plus`, `objectbox_flutter_libs`), o Flutter avisa em todo build.
+- Sem testes de UI. Os testes unitários (`flutter test`) cobrem DAOs, CSV,
+  GeoJSON e a régua. O resto é só verificar no celular.
+
+---
+
+## Atribuição
+
+Tiles de mapa:
 - © OpenStreetMap contributors (ODbL)
 - OpenTopoMap (CC-BY-SA), © OpenStreetMap contributors
-- Esri World Imagery — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community
+- Esri World Imagery — Source: Esri, Maxar, Earthstar Geographics, and the
+  GIS User Community
+
+Os requests de tile mandam um User-Agent identificável (`mappy/0.1
+(geological field mapping; com.scholze.mappy)`) — se você for forkar isso,
+troca o package name pra um seu antes de bater nos servidores deles. OSM e
+OpenTopoMap rate-limitam quem se faz passar pelos outros.
+
+---
+
+## Contato
+
+Se você é amigo meu e quer testar, me chama. Se caiu aqui por outro motivo,
+abre uma issue.
