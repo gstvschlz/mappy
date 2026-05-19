@@ -52,6 +52,9 @@ dependencies:
   # Persistence of small settings (active project id, last tile source, etc.)
   shared_preferences: ^2.2.3
 
+  # Lock-screen "we're recording your location" banner.
+  flutter_local_notifications: ^17.2.3
+
   # Misc
   uuid: ^4.4.0
   intl: 0.20.2

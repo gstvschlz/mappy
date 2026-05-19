@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/db/database.dart';
 import '../../core/db_provider.dart';
+import '../../core/notifications/tracking_notification.dart';
 
 const _kRecordingsPrefKey = 'mappy.activeRecordings';
 
@@ -122,6 +123,7 @@ class TrackRecorder extends StateNotifier<TrackRecorderState> {
     } else {
       await _sub?.cancel();
       _sub = null;
+      await TrackingNotification.instance.cancel();
     }
   }
 
@@ -131,40 +133,59 @@ class TrackRecorder extends StateNotifier<TrackRecorderState> {
     await _persist();
     await _sub?.cancel();
     _sub = null;
+    await TrackingNotification.instance.cancel();
   }
 
   /// (Re)subscribes to the GPS stream, regenerating the foreground
-  /// notification text to reflect the currently recording projects.
+  /// notification text to reflect the currently recording projects, and
+  /// keeps the lock-screen banner in sync.
   Future<void> _restartSubscription() async {
     await _sub?.cancel();
     _sub = null;
-    if (!state.any) return;
+    if (!state.any) {
+      await TrackingNotification.instance.cancel();
+      return;
+    }
 
-    final notificationText = await _notificationText();
+    final (bannerTitle, bannerBody) = await _notificationCopy();
 
     _sub = Geolocator.getPositionStream(
       locationSettings: AndroidSettings(
         accuracy: LocationAccuracy.best,
         distanceFilter: 5,
         foregroundNotificationConfig: ForegroundNotificationConfig(
-          notificationTitle: 'mappy — recording',
-          notificationText: notificationText,
+          notificationTitle: bannerTitle,
+          notificationText: bannerBody,
           enableWakeLock: true,
           setOngoing: true,
         ),
       ),
     ).listen(_onPosition);
+
+    // Show our own banner alongside the geolocator service indicator so it
+    // appears on the lock screen with full text + the mappy icon.
+    await TrackingNotification.instance.show(
+      title: bannerTitle,
+      body: bannerBody,
+    );
   }
 
-  Future<String> _notificationText() async {
+  Future<(String, String)> _notificationCopy() async {
     final recordings = state.recordings.values.toList();
     if (recordings.length == 1) {
       final project = await _db.projectDao.getById(recordings.first.projectId);
-      return project == null
-          ? 'GPS track recording in progress'
-          : 'Recording ${project.name}';
+      final projectName = project?.name ?? 'this project';
+      return (
+        'Recording — $projectName',
+        'mappy is tracking your location for "$projectName". '
+            'Open the app to view or stop the track.',
+      );
     }
-    return 'Recording ${recordings.length} projects';
+    return (
+      'Recording — ${recordings.length} projects',
+      'mappy is tracking your location for ${recordings.length} active '
+          'projects. Open the app to manage them.',
+    );
   }
 
   Future<void> _onPosition(Position pos) async {
