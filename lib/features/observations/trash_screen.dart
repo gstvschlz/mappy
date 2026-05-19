@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -5,10 +6,13 @@ import 'package:intl/intl.dart';
 import '../../core/db/database.dart';
 import '../../core/db_provider.dart';
 import '../projects/active_project.dart';
+import 'empty_state.dart';
 
 final _trashStreamProvider = StreamProvider<List<Observation>>((ref) {
   final active = ref.watch(activeProjectProvider).value;
-  if (active == null) return const Stream.empty();
+  // Yield an empty list immediately so the consumer renders the empty-state
+  // UI instead of an indefinite loading spinner.
+  if (active == null) return Stream.value(const []);
   return ref.watch(appDatabaseProvider).observationDao
       .watchTrashedForProject(active.id);
 });
@@ -29,7 +33,12 @@ class TrashScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (list) {
           if (list.isEmpty) {
-            return const Center(child: Text('Trash is empty.'));
+            return const EmptyState(
+              icon: CupertinoIcons.trash,
+              title: 'Oops! Nothing here!',
+              body: 'Deleted observations would show up here so you could '
+                  'restore them. The trash is empty for this project.',
+            );
           }
           return ListView.separated(
             itemCount: list.length,

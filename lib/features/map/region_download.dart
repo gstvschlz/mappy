@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import 'fmtc_init.dart';
+import 'manage_downloads.dart';
 import 'tile_sources.dart';
 
 const _kUserAgent =
@@ -70,7 +71,20 @@ class _RegionDownloadScreenState extends State<RegionDownloadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pre-download region')),
+      appBar: AppBar(
+        title: const Text('Pre-download region'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.storage),
+            tooltip: 'Manage downloaded tiles',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const ManageDownloadsScreen(),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../core/db/database.dart';
 import '../../core/db_provider.dart';
 import '../projects/active_project.dart';
+import 'empty_state.dart';
 import 'observation_detail.dart';
 import 'trash_screen.dart';
 
@@ -15,7 +17,10 @@ final _searchQueryProvider = StateProvider<String>((ref) => '');
 final filteredObservationsProvider =
     StreamProvider<List<Observation>>((ref) {
   final active = ref.watch(activeProjectProvider).value;
-  if (active == null) return const Stream.empty();
+  // Yielding an empty list immediately (instead of Stream.empty(), which
+  // never emits) lets the consumer's `.when(data: ...)` actually render the
+  // empty-state UI instead of spinning forever.
+  if (active == null) return Stream.value(const []);
   final q = ref.watch(_searchQueryProvider).trim();
   final dao = ref.watch(appDatabaseProvider).observationDao;
   if (q.isEmpty) return dao.watchActiveForProject(active.id);
@@ -65,7 +70,22 @@ class ObservationListScreen extends ConsumerWidget {
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (list) {
                 if (list.isEmpty) {
-                  return const Center(child: Text('No observations.'));
+                  final searching =
+                      ref.watch(_searchQueryProvider).trim().isNotEmpty;
+                  return EmptyState(
+                    icon: searching
+                        ? CupertinoIcons.search
+                        : CupertinoIcons.doc_text_search,
+                    title: 'Oops! Nothing here!',
+                    body: active == null
+                        ? 'Create or pick a project on the Projects tab to '
+                            'see its observations here.'
+                        : searching
+                            ? 'No observations match your search.'
+                            : 'You haven\'t added any observations to '
+                                '"${active.name}" yet. Tap "New observation" '
+                                'on the Map tab to start.',
+                  );
                 }
                 return ListView.separated(
                   itemCount: list.length,
