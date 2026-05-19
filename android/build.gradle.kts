@@ -2,16 +2,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url = uri("${project(":flutter_background_geolocation").projectDir}/libs")
-        }
     }
-}
-
-ext {
-    set("compileSdkVersion", 36)
-    set("targetSdkVersion", 34)
-    set("appCompatVersion", "1.6.1")
 }
 
 val newBuildDir: Directory =

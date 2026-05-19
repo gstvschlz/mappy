@@ -44,9 +44,6 @@ dependencies:
   # Permissions
   permission_handler: ^11.3.1
 
-  # Background location (track recording with screen off)
-  flutter_background_geolocation: ^4.16.4
-
   # Export / file IO
   archive: ^3.6.1
   csv: ^6.0.0
