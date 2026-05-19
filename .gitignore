@@ -1,0 +1,36 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Generated code (drift, riverpod, etc.)
+*.g.dart
+*.freezed.dart
+
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/key.properties
+android/app/google-services.json
+android/app/release/
+android/app/debug/
+**/*.jks
+**/*.keystore
+
+# iOS (not in scope but be safe)
+ios/Pods/
+ios/.symlinks/
+
+# Misc
+.DS_Store
+*.log
