@@ -26,7 +26,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -39,6 +39,9 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(tags);
             await m.createTable(observationTags);
             await _createTagIndexes();
+          }
+          if (from < 3) {
+            await m.addColumn(projects, projects.iconName);
           }
         },
         beforeOpen: (details) async {

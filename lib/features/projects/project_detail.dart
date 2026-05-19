@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../core/db/database.dart';
 import '../../core/db_provider.dart';
 import '../observations/observation_detail.dart';
+import 'project_icons.dart';
 
 final _photosForProjectProvider =
     StreamProvider.family<List<Photo>, String>((ref, projectId) {
@@ -33,6 +34,7 @@ class ProjectDetailScreen extends ConsumerWidget {
     final countAsync = ref.watch(_observationsCountProvider(project.id));
     final dateFmt = DateFormat.yMMMd();
 
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: Text(project.name),
@@ -45,12 +47,36 @@ class ProjectDetailScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: scheme.primary.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          resolveProjectIcon(project.iconName),
+                          color: scheme.primary,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          project.name,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     'Created ${dateFmt.format(project.createdAt.toLocal())}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant,
+                          color: scheme.onSurfaceVariant,
                         ),
                   ),
                   const SizedBox(height: 12),

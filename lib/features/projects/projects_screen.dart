@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import '../../core/db/database.dart';
 import '../../core/db_provider.dart';
 import 'active_project.dart';
 import 'project_detail.dart';
+import 'project_icons.dart';
 
 class ProjectsScreen extends ConsumerWidget {
   const ProjectsScreen({super.key});
@@ -65,6 +67,8 @@ class ProjectsScreen extends ConsumerWidget {
                               .setActive(projects[i].id),
                           onRename: () =>
                               _showRenameSheet(context, ref, projects[i]),
+                          onPickIcon: () =>
+                              _pickIcon(context, ref, projects[i]),
                           onDelete: () =>
                               _confirmDelete(context, ref, projects[i]),
                         ),
@@ -93,21 +97,18 @@ class ProjectsScreen extends ConsumerWidget {
 
   Future<void> _showNewProjectSheet(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
-    final name = await showModalBottomSheet<String>(
+    final result = await showModalBottomSheet<_NewProjectResult>(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => _NameSheet(
-        title: 'New project',
-        controller: controller,
-        actionLabel: 'Create',
-      ),
+      builder: (ctx) => _NewProjectSheet(controller: controller),
     );
-    if (name == null || name.trim().isEmpty) return;
+    if (result == null || result.name.trim().isEmpty) return;
     final db = ref.read(appDatabaseProvider);
     final project = Project(
       id: const Uuid().v4(),
-      name: name.trim(),
+      name: result.name.trim(),
       createdAt: DateTime.now(),
+      iconName: result.iconName,
     );
     await db.projectDao.insert(project);
     await ref.read(activeProjectProvider.notifier).setActive(project.id);
@@ -128,6 +129,16 @@ class ProjectsScreen extends ConsumerWidget {
     if (name == null || name.trim().isEmpty) return;
     final db = ref.read(appDatabaseProvider);
     await db.projectDao.updateProject(project.copyWith(name: name.trim()));
+  }
+
+  Future<void> _pickIcon(
+      BuildContext context, WidgetRef ref, Project project) async {
+    final picked = await pickProjectIcon(context, current: project.iconName);
+    if (picked == null) return;
+    final db = ref.read(appDatabaseProvider);
+    await db.projectDao.updateProject(project.copyWith(
+      iconName: Value(picked),
+    ));
   }
 
   Future<void> _confirmDelete(
@@ -172,6 +183,7 @@ class _ProjectRow extends StatelessWidget {
     required this.onTap,
     required this.onActivate,
     required this.onRename,
+    required this.onPickIcon,
     required this.onDelete,
   });
 
@@ -180,6 +192,7 @@ class _ProjectRow extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onActivate;
   final VoidCallback onRename;
+  final VoidCallback onPickIcon;
   final VoidCallback onDelete;
 
   @override
@@ -200,9 +213,7 @@ class _ProjectRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
-                isActive
-                    ? CupertinoIcons.checkmark_seal_fill
-                    : CupertinoIcons.folder_fill,
+                resolveProjectIcon(project.iconName),
                 size: 18,
                 color: isActive ? scheme.primary : scheme.onSurfaceVariant,
               ),
@@ -238,6 +249,7 @@ class _ProjectRow extends StatelessWidget {
               isActive: isActive,
               onActivate: onActivate,
               onRename: onRename,
+              onPickIcon: onPickIcon,
               onDelete: onDelete,
             ),
             const SizedBox(width: 4),
@@ -258,12 +270,14 @@ class _ActionsButton extends StatelessWidget {
     required this.isActive,
     required this.onActivate,
     required this.onRename,
+    required this.onPickIcon,
     required this.onDelete,
   });
 
   final bool isActive;
   final VoidCallback onActivate;
   final VoidCallback onRename;
+  final VoidCallback onPickIcon;
   final VoidCallback onDelete;
 
   @override
@@ -296,6 +310,13 @@ class _ActionsButton extends StatelessWidget {
             child: const Text('Rename'),
           ),
           CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              onPickIcon();
+            },
+            child: const Text('Change icon'),
+          ),
+          CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () {
               Navigator.pop(ctx);
@@ -308,6 +329,98 @@ class _ActionsButton extends StatelessWidget {
           onPressed: () => Navigator.pop(ctx),
           child: const Text('Cancel'),
         ),
+      ),
+    );
+  }
+}
+
+class _NewProjectResult {
+  const _NewProjectResult({required this.name, required this.iconName});
+  final String name;
+  final String? iconName;
+}
+
+class _NewProjectSheet extends StatefulWidget {
+  const _NewProjectSheet({required this.controller});
+  final TextEditingController controller;
+
+  @override
+  State<_NewProjectSheet> createState() => _NewProjectSheetState();
+}
+
+class _NewProjectSheetState extends State<_NewProjectSheet> {
+  String _iconName = 'folder';
+
+  @override
+  Widget build(BuildContext context) {
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 4, 16, viewInsets.bottom + 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Text(
+              'New project',
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  final picked = await pickProjectIcon(
+                    context,
+                    current: _iconName,
+                  );
+                  if (picked != null) setState(() => _iconName = picked);
+                },
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    resolveProjectIcon(_iconName),
+                    color: scheme.primary,
+                    size: 26,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: widget.controller,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Project name',
+                  ),
+                  onSubmitted: (v) => Navigator.pop(
+                    context,
+                    _NewProjectResult(name: v, iconName: _iconName),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: () => Navigator.pop(
+              context,
+              _NewProjectResult(
+                name: widget.controller.text,
+                iconName: _iconName,
+              ),
+            ),
+            child: const Text('Create'),
+          ),
+        ],
       ),
     );
   }
