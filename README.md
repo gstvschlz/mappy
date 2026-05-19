@@ -130,19 +130,6 @@ lib/
 
 ---
 
-## Coisas que ainda doem
-
-- A APK é assinada com a debug-key. Funciona pra instalar e usar, mas não
-  serve pra Play Store e cada rebuild pode forçar reinstalação (depende
-  do hash da debug-key na máquina).
-- `applicationId` ainda é `com.example.mappy` — preciso mudar antes de
-  publicar.
-- Vários plugins ainda usam o KGP velho (`camera_android_camerax`,
-  `share_plus`, `objectbox_flutter_libs`), o Flutter avisa em todo build.
-- Sem testes de UI. Os testes unitários (`flutter test`) cobrem DAOs, CSV,
-  GeoJSON e a régua. O resto é só verificar no celular.
-
----
 
 ## Atribuição
 
@@ -157,9 +144,3 @@ Os requests de tile mandam um User-Agent identificável (`mappy/0.1
 troca o package name pra um seu antes de bater nos servidores deles. OSM e
 OpenTopoMap rate-limitam quem se faz passar pelos outros.
 
----
-
-## Contato
-
-Se você é amigo meu e quer testar, me chama. Se caiu aqui por outro motivo,
-abre uma issue.
