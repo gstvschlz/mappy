@@ -26,7 +26,7 @@ class MappyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mappy',
+      title: 'mappy',
       theme: mappyTheme(),
       home: const _Bootstrap(),
       debugShowCheckedModeBanner: false,

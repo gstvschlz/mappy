@@ -105,7 +105,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Mappy needs a few permissions to map your observations.',
+              'mappy needs a few permissions to map your observations.',
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),

@@ -11,7 +11,7 @@ import 'fmtc_init.dart';
 import 'tile_sources.dart';
 
 const _kUserAgent =
-    'Mappy/0.1 (geological field mapping; com.scholze.mappy)';
+    'mappy/0.1 (geological field mapping; com.scholze.mappy)';
 
 class RegionDownloadScreen extends StatefulWidget {
   const RegionDownloadScreen({

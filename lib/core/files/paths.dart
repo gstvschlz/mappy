@@ -37,7 +37,7 @@ class AppPaths {
   /// On Android we use the standard /storage/emulated/0/Download path.
   static Future<Directory> downloadsDir() async {
     if (Platform.isAndroid) {
-      final dir = Directory('/storage/emulated/0/Download/Mappy');
+      final dir = Directory('/storage/emulated/0/Download/mappy');
       try {
         if (!await dir.exists()) {
           await dir.create(recursive: true);

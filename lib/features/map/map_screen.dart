@@ -92,7 +92,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(active?.name ?? 'Mappy'),
+        title: Text(active?.name ?? 'mappy'),
         actions: [
           IconButton(
             icon: const Icon(Icons.layers),
@@ -198,7 +198,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 tileProvider: NetworkTileProvider(
                   headers: const {
                     'User-Agent':
-                        'Mappy/0.1 (geological field mapping; com.scholze.mappy)'
+                        'mappy/0.1 (geological field mapping; com.scholze.mappy)'
                   },
                 ),
                 maxNativeZoom: src.maxZoom,

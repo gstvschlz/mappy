@@ -167,7 +167,7 @@ class _ObservationDetailScreenState
                   tileProvider: NetworkTileProvider(
                     headers: const {
                       'User-Agent':
-                          'Mappy/0.1 (geological field mapping; com.scholze.mappy)'
+                          'mappy/0.1 (geological field mapping; com.scholze.mappy)'
                     },
                   ),
                 ),
@@ -342,4 +342,3 @@ class _TagsSection extends ConsumerWidget {
     );
   }
 }
-

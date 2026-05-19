@@ -1,10 +1,10 @@
-# Mappy — one-time bootstrap script.
+# mappy — one-time bootstrap script.
 #
 # Run this once after installing the Flutter SDK and cloning this repo.
 # It will:
 #   1. Verify Flutter is installed
 #   2. Generate the Android scaffold (android/) via `flutter create`
-#   3. Patch AndroidManifest.xml with the permissions Mappy needs
+#   3. Patch AndroidManifest.xml with the permissions mappy needs
 #   4. Bump minSdkVersion to 26
 #   5. Run `flutter pub get`
 #   6. Run drift codegen (build_runner)
@@ -58,7 +58,7 @@ if ($content -notmatch 'ACCESS_FINE_LOCATION') {
 }
 
 # Set application label.
-$content = $content -replace 'android:label="mappy"', 'android:label="Mappy"'
+$content = $content -replace 'android:label="mappy"', 'android:label="mappy"'
 
 Set-Content $manifest -Value $content -Encoding utf8
 

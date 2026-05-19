@@ -1,4 +1,4 @@
-# Mappy
+# mappy
 
 A local-only Android field-mapping app for geological observations. Built with Flutter (Dart). Designed for offline use at remote field sites — photos, descriptions, GPS pins, background track recording, and ZIP/CSV/GeoJSON exports.
 
@@ -36,7 +36,7 @@ pwsh -ExecutionPolicy Bypass -File tools\bootstrap.ps1
 
 The bootstrap script:
 - Runs `flutter create .` to produce the Android scaffold (skips existing files).
-- Patches `AndroidManifest.xml` with the permissions Mappy needs (camera, fine/background location, foreground-service, notifications, photo storage).
+- Patches `AndroidManifest.xml` with the permissions mappy needs (camera, fine/background location, foreground-service, notifications, photo storage).
 - Sets `minSdkVersion` to 26.
 - Runs `flutter pub get`.
 - Runs `build_runner` to generate Drift database glue (`*.g.dart`).
@@ -76,7 +76,7 @@ Copy the APK to the phone, allow "Install from unknown sources" for whichever fi
 - **Measure tool** — tap vertices for distance (auto-switches to area readout once you have ≥3 points).
 - **Observation list** with full-text search by description.
 - **Soft delete** — observations go to a Trash screen and can be restored or deleted permanently.
-- **Export & backup** — one-tap ZIP backup to `Downloads/Mappy/` containing:
+- **Export & backup** — one-tap ZIP backup to `Downloads/mappy/` containing:
   - `observations.geojson` — FeatureCollection, points + linestrings, properties carry descriptions/photo filenames.
   - `observations.csv` — one row per observation.
   - `tracks.csv` — one row per recorded GPS point.
@@ -86,7 +86,7 @@ Copy the APK to the phone, allow "Install from unknown sources" for whichever fi
 
 ## Permissions
 
-On first run, Mappy walks you through:
+On first run, mappy walks you through:
 - **Camera** (required)
 - **Location while using app** (required)
 - **Background location** (for track recording with screen off)
@@ -144,7 +144,7 @@ Covers:
 - [ ] Open one saved JPEG on a desktop. EXIF should carry GPS, altitude, and bearing.
 - [ ] Long-press map far from current GPS → "Create observation here" produces a pin at the tapped spot.
 - [ ] Start track recording → lock phone → walk 200 m → unlock → polyline shows the walk.
-- [ ] Hit **Backup now** → unzip in `Downloads/Mappy/` on a desktop → `observations.geojson` loads in QGIS, photo filenames in properties resolve against `photos/` in the zip.
+- [ ] Hit **Backup now** → unzip in `Downloads/mappy/` on a desktop → `observations.geojson` loads in QGIS, photo filenames in properties resolve against `photos/` in the zip.
 
 ---
 

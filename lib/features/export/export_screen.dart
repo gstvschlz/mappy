@@ -48,7 +48,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
     final f = _lastFile;
     if (f == null) return;
     await Share.shareXFiles([XFile(f.path)],
-        text: 'Mappy backup');
+        text: 'mappy backup');
   }
 
   @override
@@ -69,7 +69,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Backup creates a ZIP in your Downloads/Mappy folder containing '
+              'Backup creates a ZIP in your Downloads/mappy folder containing '
               'observations.geojson, observations.csv, tracks.csv (if any), '
               'and all photo files.',
             ),

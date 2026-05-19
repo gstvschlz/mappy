@@ -147,7 +147,7 @@ class TrackRecorder extends StateNotifier<TrackRecorderState> {
         accuracy: LocationAccuracy.best,
         distanceFilter: 5,
         foregroundNotificationConfig: ForegroundNotificationConfig(
-          notificationTitle: 'Mappy — recording',
+          notificationTitle: 'mappy — recording',
           notificationText: notificationText,
           enableWakeLock: true,
           setOngoing: true,
