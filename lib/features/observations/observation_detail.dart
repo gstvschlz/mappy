@@ -161,8 +161,15 @@ class _ObservationDetailScreenState
               ),
               children: [
                 TileLayer(
-                  urlTemplate: TileSource.osm.urlTemplate,
+                  urlTemplate: TileSource.topo.urlTemplate,
+                  subdomains: TileSource.topo.subdomains,
                   userAgentPackageName: 'com.scholze.mappy',
+                  tileProvider: NetworkTileProvider(
+                    headers: const {
+                      'User-Agent':
+                          'Mappy/0.1 (geological field mapping; com.scholze.mappy)'
+                    },
+                  ),
                 ),
                 MarkerLayer(
                   markers: [

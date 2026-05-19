@@ -8,7 +8,15 @@ import 'features/map/fmtc_init.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FmtcInit.ensure();
+  // FMTC backend init has historically been the most fragile part of the
+  // startup path (ObjectBox native libs / R8 stripping). Don't let it block
+  // the app — pre-downloads need it, but live map browsing now uses
+  // NetworkTileProvider directly.
+  try {
+    await FmtcInit.ensure();
+  } catch (e, st) {
+    debugPrint('FmtcInit failed (ignored): $e\n$st');
+  }
   runApp(const ProviderScope(child: MappyApp()));
 }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -192,17 +191,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 urlTemplate: src.urlTemplate,
                 subdomains: src.subdomains,
                 userAgentPackageName: 'com.scholze.mappy',
-                tileProvider: FMTCTileProvider(
-                  stores: {src.id: BrowseStoreStrategy.readUpdateCreate},
-                  loadingStrategy: BrowseLoadingStrategy.onlineFirst,
-                  headers: {
+                // Use the plain network tile provider for the live map.
+                // FMTC's storage backend has been the suspected cause of the
+                // grey-tile issue; restricting FMTC usage to the explicit
+                // pre-download flow guarantees online browsing always works.
+                tileProvider: NetworkTileProvider(
+                  headers: const {
                     'User-Agent':
                         'Mappy/0.1 (geological field mapping; com.scholze.mappy)'
-                  },
-                  errorHandler: (exception) {
-                    debugPrint('FMTC tile error: ${exception.type} '
-                        '${exception.message}');
-                    return null;
                   },
                 ),
                 maxNativeZoom: src.maxZoom,
