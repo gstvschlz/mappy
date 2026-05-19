@@ -117,13 +117,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ),
           IconButton(
             icon: Icon(
-              trackingState.isRecording
+              active != null && trackingState.isRecording(active.id)
                   ? Icons.fiber_manual_record
                   : Icons.timeline,
-              color: trackingState.isRecording ? Colors.red : null,
+              color: active != null && trackingState.isRecording(active.id)
+                  ? Colors.red
+                  : null,
             ),
-            tooltip: trackingState.isRecording
-                ? 'Stop track'
+            tooltip: active != null && trackingState.isRecording(active.id)
+                ? 'Stop track for ${active.name}'
                 : 'Start track',
             onPressed: active == null
                 ? null
@@ -384,8 +386,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Future<void> _toggleTrack(String projectId) async {
     final notifier = ref.read(trackRecorderProvider.notifier);
-    if (ref.read(trackRecorderProvider).isRecording) {
-      await notifier.stop();
+    if (ref.read(trackRecorderProvider).isRecording(projectId)) {
+      await notifier.stop(projectId);
     } else {
       await notifier.start(projectId);
     }
