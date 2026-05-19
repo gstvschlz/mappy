@@ -1,6 +1,6 @@
 # mappy
 
-O mappy surgiu de uma necessidade **minha** — de campo mesmo, no sentido literal.
+O mappy surgiu de uma necessidade minha de campo.
 Eu precisava mapear uma região, marcar pontos, tirar fotos amarradas ao GPS,
 gravar tracks, anotar o que estava vendo, e voltar pra casa com tudo isso
 organizado num projeto. Procurei aplicativo, baixei uns dez, nenhum fazia
@@ -12,7 +12,7 @@ fica no celular até você exportar. Foi pensado pra geologia de campo, mas
 serve pra qualquer atividade que precise de "ponto + foto + descrição + GPS"
 em lugares onde não tem sinal.
 
-> Status honesto: está em desenvolvimento ativo, sou o único usuário, então
+> Status: está em desenvolvimento ativo, sou o único usuário, então
 > coisas quebram. A APK assinada com debug-key, distribuição é instalação
 > direta. Se você caiu aqui e quer experimentar, beleza — só não espere
 > Play Store.
@@ -47,7 +47,7 @@ em lugares onde não tem sinal.
   área.
 - **Lista de observações** com busca por descrição.
 - **Lixeira** — soft-delete, dá pra restaurar.
-- **Export tudo** num ZIP em `Downloads/mappy/`:
+- **Exporta tudo** num ZIP em `Downloads/mappy/`:
   - `observations.geojson` (FeatureCollection com pontos e tracks)
   - `observations.csv`
   - `tracks.csv` (uma linha por ponto GPS gravado)
@@ -80,30 +80,22 @@ gerenciador de arquivos, abre o `.apk` e instala.
 
 Tem um workflow do GitHub Actions (`.github/workflows/release.yml`) que roda
 a cada push na `main`, builda a APK e publica como release com tag
-`vX.Y.Z-build.N`. Se o repo for público, a APK é baixável direto da página
-de releases sem login.
+`vX.Y.Z-build.N`. Como o repo é público, tu consegue baixar via: https://github.com/gstvschlz/mappy/releases
 
 ---
 
 ## Stack
 
-Tudo Flutter/Dart. Nada de backend.
+Tudo Flutter/Dart.
 
 - **Riverpod** pra state.
-- **go_router** pra navegação (legado — boa parte do app ainda usa Navigator
-  direto).
+- **Navigator** pra navegação.
 - **Drift** (SQLite) pro banco local, com codegen via `build_runner`.
 - **flutter_map** + **FMTC** (Flutter Map Tile Caching, com backend ObjectBox)
-  pro mapa e cache offline. **Importante:** o mapa "ao vivo" usa
-  `NetworkTileProvider` direto, sem FMTC, porque o backend dele tem dado
-  problema em release build (provavelmente R8 minificando demais). O FMTC
-  só entra quando você usa o pre-download explícito.
+  pro mapa e cache offline.
 - **geolocator** pro GPS (foreground e streaming).
 - **camera** + **flutter_image_compress** + **native_exif** pra fotos.
 - **flutter_local_notifications** pro banner de tracking na lock screen.
-- Ícone do app gerado por um script Dart (`tools/gen_icon.dart`) que desenha
-  um pin de mapa estilizado com bandas estratigráficas e um martelo de
-  geólogo. Placeholder até eu fazer um decente.
 
 ---
 
@@ -143,4 +135,3 @@ Os requests de tile mandam um User-Agent identificável (`mappy/0.1
 (geological field mapping; com.scholze.mappy)`) — se você for forkar isso,
 troca o package name pra um seu antes de bater nos servidores deles. OSM e
 OpenTopoMap rate-limitam quem se faz passar pelos outros.
-
