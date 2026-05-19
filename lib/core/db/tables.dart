@@ -54,3 +54,27 @@ class TrackPoints extends Table {
   RealColumn get speed => real().nullable()();
   DateTimeColumn get recordedAt => dateTime()();
 }
+
+class Tags extends Table {
+  TextColumn get id => text()();
+  TextColumn get projectId =>
+      text().references(Projects, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text().withLength(min: 1, max: 100)();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+
+  // Uniqueness enforced per-project, case-insensitive, by an index defined
+  // in the database migration (see AppDatabase.onCreate / onUpgrade).
+}
+
+class ObservationTags extends Table {
+  TextColumn get observationId =>
+      text().references(Observations, #id, onDelete: KeyAction.cascade)();
+  TextColumn get tagId =>
+      text().references(Tags, #id, onDelete: KeyAction.cascade)();
+
+  @override
+  Set<Column> get primaryKey => {observationId, tagId};
+}
