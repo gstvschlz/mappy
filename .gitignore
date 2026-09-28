@@ -37,3 +37,4 @@ ios/.symlinks/
 
 # Demo: gravações brutas (grandes) e capturas de depuração
 tools/demo/saida/
+__pycache__/
