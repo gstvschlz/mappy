@@ -1,0 +1,51 @@
+[tools]
+flutter = "3.44.0"
+java = "temurin-17"
+android-sdk = "22.0"
+ffmpeg = "latest"
+python = "3.11"
+
+[tasks.codegen]
+description = "Gera os *.g.dart (drift, riverpod)"
+run = "dart run build_runner build --delete-conflicting-outputs"
+
+[tasks.setup]
+description = "Dependências + codegen"
+run = "flutter pub get"
+depends_post = ["codegen"]
+
+[tasks.analyze]
+description = "flutter analyze"
+run = "flutter analyze --no-fatal-infos"
+
+[tasks.test]
+description = "flutter test"
+run = "flutter test"
+
+[tasks.build]
+description = "APK release"
+run = "flutter build apk --release"
+
+# Demo: emulador com dados falsos, de onde saem as imagens e vídeos do site e do README.
+# O seed APAGA os dados do app no aparelho conectado: só em emulador.
+
+[tasks.demo-avd]
+description = "Cria o emulador mappy_demo (câmera com foto de rocha)"
+run = "python tools/demo/avd.py"
+
+[tasks.demo-emulator]
+description = "Liga o emulador mappy_demo"
+run = "emulator -avd mappy_demo -no-snapshot -no-audio -no-boot-anim"
+
+[tasks.demo-seed]
+description = "Instala a APK release no emulador e semeia dados falsos (apaga o app!)"
+depends = ["build"]
+run = ["adb install -r build/app/outputs/flutter-apk/app-release.apk", "python tools/demo/seed.py"]
+
+[tasks.demo-gravar]
+description = "Grava as telas e os clipes no emulador semeado"
+run = "python tools/demo/gravar.py tudo"
+
+[tasks.demo-montar]
+description = "Codifica tudo para site/media e .github/media"
+run = "python tools/demo/montar.py"

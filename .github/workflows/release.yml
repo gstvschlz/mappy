@@ -3,6 +3,7 @@ name: Release
 on:
   push:
     branches: [main]
+    paths-ignore: [site/**, .github/media/**, README.md, tools/demo/**]
   workflow_dispatch:
 
 permissions:

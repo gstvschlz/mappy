@@ -34,3 +34,6 @@ ios/.symlinks/
 # Misc
 .DS_Store
 *.log
+
+# Demo: gravações brutas (grandes) e capturas de depuração
+tools/demo/saida/

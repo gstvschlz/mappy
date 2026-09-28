@@ -1,137 +1,58 @@
 # mappy
 
-O mappy surgiu de uma necessidade minha de campo.
-Eu precisava mapear uma região, marcar pontos, tirar fotos amarradas ao GPS,
-gravar tracks, anotar o que estava vendo, e voltar pra casa com tudo isso
-organizado num projeto. Procurei aplicativo, baixei uns dez, nenhum fazia
-exatamente o que eu queria sem me obrigar a criar conta, sincronizar com
-nuvem ou pagar assinatura. Aí decidi que era mais rápido fazer eu mesmo.
+um app de campo 100% offline para mapear, fotografar e anotar, sem conta e sem nuvem.
 
-É um app offline, local-only, sem cadastro, sem sync, sem nada disso. Tudo
-fica no celular até você exportar. Foi pensado pra geologia de campo, mas
-serve pra qualquer atividade que precise de "ponto + foto + descrição + GPS"
-em lugares onde não tem sinal.
+Eu precisava mapear uma região: marcar pontos, tirar fotos amarradas ao GPS, gravar o trajeto e voltar com tudo organizado num projeto. Nenhum app que testei fazia isso sem exigir conta, sync ou assinatura, então fiz o meu. Nasceu para geologia de campo, mas serve para qualquer trabalho de "ponto + foto + descrição + GPS" onde não há sinal.
 
-> Status: está em desenvolvimento ativo, sou o único usuário, então
-> coisas quebram. A APK assinada com debug-key, distribuição é instalação
-> direta. Se você caiu aqui e quer experimentar, beleza — só não espere
-> Play Store.
+> Em desenvolvimento ativo e com um único usuário, então coisas quebram. A APK é assinada com a chave de debug e distribuída por instalação direta: nada de Play Store.
 
----
+<p align="center">
+  <img src=".github/media/mapa.gif" width="280" alt="o mapa topográfico com os pontos de um projeto, e a troca para satélite">
+</p>
 
-## O que ele faz hoje
+Site com a demo em vídeo: <https://gstvschlz.github.io/mappy/>
 
-- **Mapa offline-friendly** com três fontes de tile: OpenStreetMap,
-  OpenTopoMap (topográfico, com curvas de nível — o default) e Esri World
-  Imagery (satélite). Troca pelo ícone de camadas no topo.
-- **Pré-download de região** — desenha um retângulo no mapa, escolhe o range
-  de zoom, e o app baixa todos os tiles pra usar depois sem internet. Cache
-  via FMTC.
-- **Nova observação** — abre a câmera in-app, tira N fotos da mesma parada,
-  escreve uma descrição, e o GPS é capturado automaticamente no save. EXIF
-  com lat/lon, bearing da bússola e altitude vai dentro de cada JPEG.
-- **Long-press no mapa** pra criar um ponto manualmente onde você quiser
-  (útil pra coisas que você viu mas não chegou perto o suficiente).
-- **Projetos** — separe trabalhos diferentes. Cada projeto tem ícone
-  próprio (vulcão, montanha, martelo, cristal, etc), e a aba mostra um
-  feed visual com todas as fotos do projeto.
-- **Tags por observação** com autocomplete — você digita uma tag e ele
-  sugere as que já usou nesse projeto. Pode adicionar na hora de tirar a
-  foto ou editar depois.
-- **Gravação de trajeto** rodando em foreground service. Cada projeto tem
-  seu próprio estado de gravação independente — dá pra estar gravando dois
-  projetos ao mesmo tempo. Sobrevive a fechar e reabrir o app.
-- **Banner persistente na tela de bloqueio** enquanto está rastreando, pra
-  você não esquecer que o GPS tá ligado e queimar bateria à toa.
-- **Régua** — toca em pontos pra medir distância. A partir de 3 pontos vira
-  área.
-- **Lista de observações** com busca por descrição.
-- **Lixeira** — soft-delete, dá pra restaurar.
-- **Exporta tudo** num ZIP em `Downloads/mappy/`:
-  - `observations.geojson` (FeatureCollection com pontos e tracks)
-  - `observations.csv`
-  - `tracks.csv` (uma linha por ponto GPS gravado)
-  - `photos/<id>/*.jpg` com EXIF preservado
+## as telas
 
----
+| mapa | observação | projetos | nova observação |
+| :---: | :---: | :---: | :---: |
+| <img src=".github/media/mapa.png" width="190" alt="mapa topográfico com pontos e trajeto"> | <img src=".github/media/observacao.png" width="190" alt="observação com fotos, tags e coordenadas"> | <img src=".github/media/projetos.png" width="190" alt="lista de projetos"> | <img src=".github/media/nova.png" width="190" alt="nova observação com fotos, descrição e tag"> |
+| topo, ruas ou satélite | fotos, descrição, tags e GPS | um por trabalho | o GPS entra ao salvar |
 
-## Como rodar (se você quiser brincar)
+<p align="center">
+  <img src=".github/media/nova.gif" width="280" alt="tirar duas fotos, escrever a descrição, escolher a tag e salvar">
+</p>
 
-Vai precisar do Flutter (canal stable, 3.27+) e do Android SDK (API 26+).
-Depois, do raiz do repo:
+## o que tem
 
-```powershell
-flutter pub get
-dart run build_runner build --delete-conflicting-outputs
-flutter run
-```
+- **Mapa** com OpenStreetMap, OpenTopoMap (o padrão, com curvas de nível) e Esri World Imagery, e **pré-download de região** para usar sem internet.
+- **Observações**: câmera no app, quantas fotos quiser por parada, descrição e tags com sugestão. O GPS é capturado ao salvar e vai no EXIF (lat, lon, direção e altitude). Pressão longa no mapa cria um ponto à mão.
+- **Projetos** com ícone e feed de fotos. Cada um grava o seu **trajeto** num serviço em primeiro plano (dá para gravar dois ao mesmo tempo), com aviso na tela de bloqueio.
+- **Régua**: distância entre pontos e, a partir de três, área.
+- **Busca**, **lixeira** e **exportação** para um ZIP em `Downloads/mappy/` com `observations.geojson`, `observations.csv`, `tracks.csv` e as fotos.
 
-Pra gerar a APK de release:
+## como rodar
 
-```powershell
-flutter build apk --release
-# Sai em: build/app/outputs/flutter-apk/app-release.apk
-```
+Ferramentas via [mise](https://mise.jdx.dev): `mise install` traz Flutter, JDK e Android SDK.
 
-Copia pro celular, libera "Instalar de fontes desconhecidas" pro seu
-gerenciador de arquivos, abre o `.apk` e instala.
+- `mise run setup`: dependências e codegen (Drift e Riverpod)
+- `mise run analyze` / `mise run test`
+- `mise run build`: APK release em `build/app/outputs/flutter-apk/`
 
-### CI
+Cada push na `main` builda a APK e publica uma [release](https://github.com/gstvschlz/mappy/releases). Para instalar, baixe o `.apk`, permita "fontes desconhecidas" e abra.
 
-Tem um workflow do GitHub Actions (`.github/workflows/release.yml`) que roda
-a cada push na `main`, builda a APK e publica como release com tag
-`vX.Y.Z-build.N`. Como o repo é público, tu consegue baixar via: https://github.com/gstvschlz/mappy/releases
+## a demo
 
----
+As imagens e vídeos daqui vêm de um emulador com dados falsos (fotos de domínio público ou CC0, créditos em `tools/demo/fotos/`). Nunca rode o seed num aparelho real: ele apaga o app.
 
-## Stack
+1. `mise run demo-avd` cria o emulador `mappy_demo`; `mise run demo-emulator` liga.
+2. `mise run demo-seed` instala a APK e semeia 2 projetos, 10 observações e 2 trajetos.
+3. `mise run demo-gravar` grava as telas e clipes; `mise run demo-montar` gera `site/media` e `.github/media`.
 
-Tudo Flutter/Dart.
+## stack
 
-- **Riverpod** pra state.
-- **Navigator** pra navegação.
-- **Drift** (SQLite) pro banco local, com codegen via `build_runner`.
-- **flutter_map** + **FMTC** (Flutter Map Tile Caching, com backend ObjectBox)
-  pro mapa e cache offline.
-- **geolocator** pro GPS (foreground e streaming).
-- **camera** + **flutter_image_compress** + **native_exif** pra fotos.
-- **flutter_local_notifications** pro banner de tracking na lock screen.
+Flutter/Dart com Riverpod, Drift (SQLite), flutter_map + FMTC (cache de tiles), geolocator, camera e native_exif.
 
----
+## atribuição
 
-## Layout do código
-
-```
-lib/
-├─ main.dart
-├─ app/                        # Tema, shell de navegação
-├─ core/
-│  ├─ db/                      # Tabelas Drift + DAOs (com codegen)
-│  ├─ location/                # Wrappers de geolocator e bússola
-│  ├─ permissions/             # Tela de primeira execução
-│  ├─ notifications/           # Banner persistente de tracking
-│  ├─ files/                   # Pastas de app-docs e Downloads
-│  └─ exif/                    # Escrita de EXIF GPS+bearing+altitude
-└─ features/
-   ├─ map/                     # flutter_map, fontes de tile, régua, pre-download
-   ├─ observations/            # Fluxo de captura, câmera, lista, detalhe, lixeira
-   ├─ projects/                # CRUD + ícones por projeto + projeto ativo
-   ├─ tracks/                  # Recorder multi-projeto + camada de polilinha
-   └─ export/                  # GeoJSON / CSV / ZIP
-```
-
----
-
-
-## Atribuição
-
-Tiles de mapa:
-- © OpenStreetMap contributors (ODbL)
-- OpenTopoMap (CC-BY-SA), © OpenStreetMap contributors
-- Esri World Imagery — Source: Esri, Maxar, Earthstar Geographics, and the
-  GIS User Community
-
-Os requests de tile mandam um User-Agent identificável (`mappy/0.1
-(geological field mapping; com.scholze.mappy)`) — se você for forkar isso,
-troca o package name pra um seu antes de bater nos servidores deles. OSM e
-OpenTopoMap rate-limitam quem se faz passar pelos outros.
+Tiles: © OpenStreetMap contributors (ODbL); OpenTopoMap (CC-BY-SA); Esri, Maxar, Earthstar Geographics e a comunidade GIS. Os requests mandam um User-Agent identificável (`mappy/0.1 (geological field mapping; com.scholze.mappy)`): se for forkar, troque o package name antes de bater nos servidores deles, porque OSM e OpenTopoMap limitam quem se passa por outro.
